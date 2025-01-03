@@ -22,6 +22,19 @@ module.exports = {
       backgroundSize: {
         'grid-size': '30px 30px',
       },
+      colors: {
+        'primary': '#FFC107',
+        'secondary': '#FFA000',
+        'accent': '#FF5722',
+        'success': '#4CAF50',
+        'info': '#03A9F4',
+        'warning': '#FFC107',
+        'error': '#FF5722',
+        'dark': '#0f172a',
+        'light': '#F5F5F5',
+        'white': '#FFFFFF',
+        'dark-light': '#1e293b',
+      },
     },
 
   },

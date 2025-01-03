@@ -2,9 +2,9 @@
 
 // Enum for Dark Mode
 export const DarkMode = {
-  light: 'light',
-  dark: 'dark',
-  system: 'system'
+  light: 'Light',
+  dark: 'Dark',
+  system: 'System'
 };
 
 // Pinia store for managing dark mode
@@ -12,20 +12,21 @@ import { defineStore } from 'pinia';
 
 export const useDarkStore = defineStore('dark', {
   state: () => ({
-    darkMode: DarkMode.system, // Default mode is system
+    darkMode: localStorage.getItem('darkMode') || DarkMode.system,
+    isShow: false,
   }),
 
   actions: {
-    // Toggle between dark and light modes
-    toggleDarkMode() {
-      this.darkMode = this.darkMode === DarkMode.dark ? DarkMode.light : DarkMode.dark;
-      this.saveToLocalStorage();
+    toggleShow() {
+      this.isShow = !this.isShow;
     },
 
-    // Set the theme explicitly (light, dark, or system)
-    setDarkMode(mode) {
-      this.darkMode = mode;
+    // Toggle between dark, light, and system modes
+    toggleDarkMode(darkModes) {
+      this.darkMode = darkModes;
       this.saveToLocalStorage();
+      this.initializeDarkMode();
+      this.toggleShow();
     },
 
     // Save the current theme to localStorage
@@ -33,15 +34,47 @@ export const useDarkStore = defineStore('dark', {
       localStorage.setItem('darkMode', this.darkMode);
     },
 
-    // Load the theme from localStorage when the store is initialized
-    loadFromLocalStorage() {
-      const savedTheme = localStorage.getItem('darkMode');
-      if (savedTheme && Object.values(DarkMode).includes(savedTheme)) {
-        this.darkMode = savedTheme;
+    // Initialize dark mode based on the current setting
+    initializeDarkMode() {
+      if (this.darkMode === DarkMode.dark) {
+        this.darkModeInit();
+      } else if (this.darkMode === DarkMode.light) {
+        this.lightModeInit();
+      } else {
+        this.systemModeInit();
+        // this.addSystemListener();
       }
-    }
-  },
+    },
 
-  // Call loadFromLocalStorage on store initialization
-  persist: true, // Optional, if you want pinia persistence
+    // Add listener for system color scheme changes
+    addSystemListener() {
+      if (window.matchMedia) {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        mediaQuery.addEventListener('change', (e) => {
+          e.matches ? this.darkModeInit() : this.lightModeInit();
+        });
+      }
+    },
+
+    // Initialize dark mode
+    darkModeInit() {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    },
+
+    // Initialize light mode
+    lightModeInit() {
+      document.documentElement.classList.add('light');
+      document.documentElement.classList.remove('dark');
+    },
+
+    // Initialize system mode
+    systemModeInit() {
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        this.darkModeInit();
+      } else {
+        this.lightModeInit();
+      }
+    },
+  },
 });
